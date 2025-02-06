@@ -1,0 +1,60 @@
+name: Build CI
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+  branch_protection_rule:
+    types: [created, completed]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ '1.22.x' ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Build Android arm64
+        env:
+          GOOS: android
+          GOARCH: arm64
+        run: go build -v -o bki_go-${{ env.GOARCH }} main.go
+
+      - name: Build Android arm
+        env:
+          GOOS: android
+          GOARCH: arm
+        run: go build -v -o bki_go-${{ env.GOARCH }} main.go
+
+      - name: Build Android i386
+        env:
+          GOOS: android
+          GOARCH: 386
+        run: go build -v -o bki_go-${{ env.GOARCH }} main.go
+
+      - name: Build Android amd64
+        env:
+          GOOS: android
+          GOARCH: amd64
+        run: go build -v -o bki_go-${{ env.GOARCH }} main.go
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: bki_go-*
