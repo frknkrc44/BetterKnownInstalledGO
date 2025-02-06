@@ -39,6 +39,7 @@ jobs:
         env:
           GOOS: android
           GOARCH: arm
+          CGO_ENABLED: 1
         run: go build -v -o bki_go-${{ env.GOARCH }} main.go
 
       - name: Build Android i386
