@@ -26,6 +26,12 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+
       - name: Install dependencies
         run: go get .
 
@@ -33,6 +39,8 @@ jobs:
         env:
           GOOS: android
           GOARCH: arm64
+          CGO_ENABLED: 1
+          CC: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-androideabi24-clang
         run: go build -v -o bki_go-${{ env.GOARCH }} main.go
 
       - name: Build Android arm
@@ -40,18 +48,23 @@ jobs:
           GOOS: android
           GOARCH: arm
           CGO_ENABLED: 1
+          CC: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi24-clang
         run: go build -v -o bki_go-${{ env.GOARCH }} main.go
 
       - name: Build Android i386
         env:
           GOOS: android
           GOARCH: 386
+          CGO_ENABLED: 1
+          CC: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android24-clang
         run: go build -v -o bki_go-${{ env.GOARCH }} main.go
 
       - name: Build Android amd64
         env:
           GOOS: android
           GOARCH: amd64
+          CGO_ENABLED: 1
+          CC: ${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android24-clang
         run: go build -v -o bki_go-${{ env.GOARCH }} main.go
 
       - name: Upload artifacts
